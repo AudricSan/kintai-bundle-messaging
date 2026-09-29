@@ -7,6 +7,7 @@ namespace kintai\Bundles\Installed\Messaging\Controllers\Api;
 use kintai\Core\Exceptions\ForbiddenException;
 use kintai\Core\Exceptions\NotFoundException;
 use kintai\Core\Repositories\MessageRepositoryInterface;
+use kintai\Core\Repositories\StoreUserRepositoryInterface;
 use kintai\Core\Request;
 use kintai\Core\Response;
 
@@ -16,10 +17,19 @@ use kintai\Core\Response;
  * volontairement absentes de config/api-permissions.php, en libre-service
  * comme notifications.*, mais bornées ici par appartenance plutôt que par
  * RBAC — un rôle n'a jamais besoin de porter les messages d'un tiers).
+ *
+ * Ajouter un participant reste malgré tout borné au scoping magasin, comme
+ * partout ailleurs dans l'app : createThread()/addParticipant() vérifient
+ * via assertCanAddParticipant() que la cible partage un store avec l'appelant
+ * avant de l'ajouter, pour empêcher un employé de découvrir l'appartenance
+ * d'un utilisateur d'un store auquel il n'a pas accès.
  */
 final class MessageController
 {
-    public function __construct(private readonly MessageRepositoryInterface $messages) {}
+    public function __construct(
+        private readonly MessageRepositoryInterface $messages,
+        private readonly StoreUserRepositoryInterface $storeUsers,
+    ) {}
 
     // ─────────────────────────────────────────────────────────────────────────
     // Threads
@@ -68,6 +78,7 @@ final class MessageController
             fn($uid) => $uid > 0 && $uid !== $userId
         ));
         foreach ($participantIds as $uid) {
+            $this->assertCanAddParticipant($userId, $uid);
             $this->messages->saveParticipant([
                 'thread_id'  => $threadId,
                 'user_id'    => $uid,
@@ -161,12 +172,14 @@ final class MessageController
     public function addParticipant(Request $request): Response
     {
         $threadId = (int) $request->param('id');
-        $this->requireThreadParticipant($request, $threadId);
+        $actingUserId = $this->requireThreadParticipantId($request, $threadId);
 
         $data = array_merge($request->json() ?? [], [
             'thread_id'  => $threadId,
             'created_at' => date('Y-m-d H:i:s'),
         ]);
+
+        $this->assertCanAddParticipant($actingUserId, (int) ($data['user_id'] ?? 0));
 
         return Response::json($this->messages->saveParticipant($data), 201);
     }
@@ -219,5 +232,22 @@ final class MessageController
     {
         $this->requireThreadParticipant($request, $threadId);
         return $this->authUserId($request);
+    }
+
+    /**
+     * Vérifie que la cible partage au moins un store avec l'appelant avant
+     * de l'ajouter à un thread. Sans ce garde, n'importe quel user_id valide
+     * pouvait être ajouté à une conversation, quel que soit son store.
+     */
+    private function assertCanAddParticipant(int $actingUserId, int $targetUserId): void
+    {
+        if ($targetUserId <= 0 || $targetUserId === $actingUserId) {
+            return;
+        }
+        $actingStoreIds = array_map(fn($su) => (int) $su['store_id'], $this->storeUsers->findByUser($actingUserId));
+        $targetStoreIds = array_map(fn($su) => (int) $su['store_id'], $this->storeUsers->findByUser($targetUserId));
+        if (array_intersect($actingStoreIds, $targetStoreIds) === []) {
+            throw new NotFoundException(__('error_participant_not_found'));
+        }
     }
 }

@@ -8,6 +8,10 @@ Le schéma de version (X.Y.Z, canaux alpha/beta/main) est décrit dans
 
 ## [Unreleased]
 
+### Fixed
+
+- `MessageController::createThread()`/`addParticipant()` (API) acceptaient n'importe quel `user_id` valide sans vérifier qu'il partage un store avec l'appelant, ce qui permettait à un employé d'ajouter — et donc de découvrir l'appartenance — un utilisateur d'un autre store à une conversation. Les deux méthodes vérifient désormais un store partagé avant l'ajout.
+
 ## [1.1.0] - 2026-09-29
 
 ### Changed
