@@ -6,6 +6,9 @@
 /** @var int      $user_id     ID de l'utilisateur connecté */
 /** @var string   $base_path   '/admin/messages' ou '/employee/messages' */
 ?>
+<?php if ($messagingCss = bundle_asset('messaging', 'css/messaging.css')): ?>
+<link rel="stylesheet" href="<?= $messagingCss ?>">
+<?php endif; ?>
 
 <?= \kintai\UI\Components\Flash::fromQuery('success', ['deleted' => __('thread_deleted')])->render() ?>
 

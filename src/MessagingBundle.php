@@ -35,6 +35,7 @@ final class MessagingBundle extends Bundle
         $this->registerServices();
         $this->loadViewsFrom($this->getPath() . '/Views', 'messaging');
         $this->loadRoutesFrom($this->getPath() . '/routes.php');
+        $this->loadAssetsFrom('public');
     }
 
     private function registerServices(): void
