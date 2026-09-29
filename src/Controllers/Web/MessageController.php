@@ -169,12 +169,14 @@ final class MessageController
             $this->msgRepo->saveParticipant(['thread_id' => $threadId, 'user_id' => $rid, 'is_read' => 0]);
         }
 
+        $senderName = $authUser['display_name'] ?? $authUser['email'] ?? ('#' . $userId);
         $this->notifs->notifyMany(
             $recipients,
             'message_received',
             'notif_message_received_body',
-            ['subject' => mb_strimwidth($subject, 0, 60, '…')],
-            $threadId
+            ['sender' => $senderName, 'subject' => mb_strimwidth($subject, 0, 60, '…')],
+            $threadId,
+            '/employee/messages/' . $threadId
         );
 
         $this->auditLogger->log($request, 'message.sent', 'message_thread', $threadId, [
@@ -264,12 +266,14 @@ final class MessageController
         }
 
         if (!empty($otherParticipants)) {
+            $senderName = $authUser['display_name'] ?? $authUser['email'] ?? ('#' . $userId);
             $this->notifs->notifyMany(
                 $otherParticipants,
                 'message_received',
                 'notif_thread_message_received_body',
-                ['subject' => mb_strimwidth($thread['subject'] ?? '', 0, 60, '…')],
-                $threadId
+                ['sender' => $senderName, 'subject' => mb_strimwidth($thread['subject'] ?? '', 0, 60, '…')],
+                $threadId,
+                '/employee/messages/' . $threadId
             );
         }
 
