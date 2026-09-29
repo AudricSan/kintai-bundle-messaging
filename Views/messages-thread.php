@@ -14,6 +14,9 @@ $participantNames = array_map(
 );
 $_canManage = $can_manage ?? true;
 ?>
+<?php if ($messagingCss = bundle_asset('messaging', 'css/messaging.css')): ?>
+<link rel="stylesheet" href="<?= $messagingCss ?>">
+<?php endif; ?>
 
 <?= \kintai\UI\Components\Flash::fromQuery('success', ['sent' => __('message_sent'), 'replied' => __('message_replied')])->render() ?>
 
@@ -83,4 +86,6 @@ $_canManage = $can_manage ?? true;
     </div>
 </div>
 
-<script src="<?= $BASE_URL ?>/assets/js/modules/message-stream.js"></script>
+<?php if ($messageStreamJs = bundle_asset('messaging', 'js/message-stream.js')): ?>
+<script src="<?= $messageStreamJs ?>"></script>
+<?php endif; ?>
