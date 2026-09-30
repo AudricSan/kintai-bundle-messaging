@@ -8,6 +8,10 @@ Le schéma de version (X.Y.Z, canaux alpha/beta/main) est décrit dans
 
 ## [Unreleased]
 
+### Changed
+
+- Garde-fou contre les handlers inline, en prévision de la Content-Security-Policy stricte de Kintai Core 0.3.0 (`script-src 'self' 'nonce-…'`, sans `'unsafe-inline'`) : `tests.yml` échoue désormais si un attribut `onclick=`/`onchange=`/`onsubmit=`/`oninput=`, un lien `javascript:` ou un `<script>` sans nonce apparaît dans `Views/` ou `src/` — le navigateur les bloquerait en silence, sans aucune erreur côté serveur. **Aucun changement fonctionnel** : les vues de ce bundle n'utilisent déjà aucun handler inline ni `<script>` inline exécutable. La règle est documentée dans `CONTRIBUTING.md` et `CLAUDE.md`.
+
 ### Fixed
 
 - `MessageController::createThread()`/`addParticipant()` (API) acceptaient n'importe quel `user_id` valide sans vérifier qu'il partage un store avec l'appelant, ce qui permettait à un employé d'ajouter — et donc de découvrir l'appartenance — un utilisateur d'un autre store à une conversation. Les deux méthodes vérifient désormais un store partagé avant l'ajout.
