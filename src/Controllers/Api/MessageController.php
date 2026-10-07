@@ -23,6 +23,13 @@ use kintai\Core\Response;
  * via assertCanAddParticipant() que la cible partage un store avec l'appelant
  * avant de l'ajouter, pour empêcher un employé de découvrir l'appartenance
  * d'un utilisateur d'un store auquel il n'a pas accès.
+ *
+ * Régression (audit du 03/10/2026) : addMessage() et addParticipant() fusionnaient le JSON brut du
+ * client. Un `id` dans le corps (POST /messages/threads/{id}/messages) faisait un upsert sur le message
+ * d'un autre fil : il était déplacé dans le fil de l'appelant, réécrit, et sa réponse en exposait le
+ * contenu — sans aucune permission au-delà de l'authentification. Seuls `body` (message) et `user_id`
+ * (participant) sont lus ; le reste est imposé par le serveur. createThread() exige désormais un store
+ * dont l'appelant est membre.
  */
 final class MessageController
 {
@@ -58,8 +65,13 @@ final class MessageController
         $userId = $this->authUserId($request);
         $data   = $request->json() ?? [];
 
+        $storeId = (int) ($data['store_id'] ?? 0);
+        if ($storeId <= 0 || $this->storeUsers->findMembership($storeId, $userId) === null) {
+            throw new ForbiddenException(__('error_access_denied'));
+        }
+
         $thread = $this->messages->saveThread([
-            'store_id'   => $data['store_id'] ?? null,
+            'store_id'   => $storeId,
             'subject'    => $data['subject'] ?? null,
             'creator_id' => $userId,
             'created_at' => date('Y-m-d H:i:s'),
@@ -129,11 +141,13 @@ final class MessageController
         $threadId = (int) $request->param('id');
         $userId   = $this->requireThreadParticipantId($request, $threadId);
 
-        $data = array_merge($request->json() ?? [], [
+        // Seul le texte vient du client : un `id` ici écraserait le message d'un autre fil.
+        $data = [
             'thread_id'  => $threadId,
             'sender_id'  => $userId,
+            'body'       => (string) ($request->json('body') ?? ''),
             'created_at' => date('Y-m-d H:i:s'),
-        ]);
+        ];
 
         return Response::json($this->messages->saveMessage($data), 201);
     }
@@ -174,10 +188,13 @@ final class MessageController
         $threadId = (int) $request->param('id');
         $actingUserId = $this->requireThreadParticipantId($request, $threadId);
 
-        $data = array_merge($request->json() ?? [], [
+        // Seul user_id vient du client : un `id` ici réécrirait la ligne de participation d'un autre fil.
+        $data = [
             'thread_id'  => $threadId,
+            'user_id'    => (int) ($request->json('user_id') ?? 0),
+            'is_read'    => 0,
             'created_at' => date('Y-m-d H:i:s'),
-        ]);
+        ];
 
         $this->assertCanAddParticipant($actingUserId, (int) ($data['user_id'] ?? 0));
 

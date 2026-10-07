@@ -14,6 +14,7 @@ Le schéma de version (X.Y.Z, canaux alpha/beta/main) est décrit dans
 
 ### Fixed
 
+- Sécurité — `POST /api/v1/messages/threads/{id}/messages` et `.../participants` fusionnaient le JSON brut du client dans `save()` (upsert dès qu'un `id` est présent) : avec l'`id` d'un message d'un autre fil, l'appelant le déplaçait dans son propre fil, le réécrivait, et la réponse en exposait le contenu — sans autre permission que l'authentification. Seuls `body` (message) et `user_id` (participant) sont lus, le reste est imposé par le serveur. `POST /messages/threads` exige désormais un `store_id` dont l'appelant est membre (jusqu'ici une valeur absente donnait une erreur 500).
 - `MessageController::createThread()`/`addParticipant()` (API) acceptaient n'importe quel `user_id` valide sans vérifier qu'il partage un store avec l'appelant, ce qui permettait à un employé d'ajouter — et donc de découvrir l'appartenance — un utilisateur d'un autre store à une conversation. Les deux méthodes vérifient désormais un store partagé avant l'ajout.
 
 ## [1.1.0] - 2026-09-29
