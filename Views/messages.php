@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="<?= $messagingCss ?>">
 <?php endif; ?>
 
-<?= \kintai\UI\Components\Flash::fromQuery('success', ['deleted' => __('thread_deleted')])->render() ?>
+<?= \kintai\Contract\View\Components\Flash::fromQuery('success', ['deleted' => __('thread_deleted')])->render() ?>
 
 <div class="page-header">
     <h2 class="page-header__title"><?= __('messages') ?> <span class="page-count">(<?= count($threads) ?>)</span></h2>
