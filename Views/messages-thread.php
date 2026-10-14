@@ -18,7 +18,7 @@ $_canManage = $can_manage ?? true;
 <link rel="stylesheet" href="<?= $messagingCss ?>">
 <?php endif; ?>
 
-<?= \kintai\UI\Components\Flash::fromQuery('success', ['sent' => __('message_sent'), 'replied' => __('message_replied')])->render() ?>
+<?= \kintai\Contract\View\Components\Flash::fromQuery('success', ['sent' => __('message_sent'), 'replied' => __('message_replied')])->render() ?>
 
 <div class="page-header">
     <h2 class="page-header__title"><?= htmlspecialchars($thread['subject'] ?? '') ?></h2>
