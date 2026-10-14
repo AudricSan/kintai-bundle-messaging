@@ -8,8 +8,8 @@ use kintai\Contract\Bundle;
 use kintai\Contract\Container;
 use kintai\Contract\Extension\NavItem;
 use kintai\Contract\Extension\StoreFeature;
-use kintai\Core\Repositories\DatabaseMessageRepository;
-use kintai\Core\Repositories\MessageRepositoryInterface;
+use kintai\Bundles\Installed\Messaging\Repositories\DatabaseMessageRepository;
+use kintai\Bundles\Installed\Messaging\Repositories\MessageRepositoryInterface;
 
 final class MessagingBundle extends Bundle
 {
@@ -94,5 +94,13 @@ final class MessagingBundle extends Bundle
                 }
             },
         ];
+    }
+
+    /**
+     * Type de notification (contrat 1.7) : nouveau message reçu ; libellé « notif_message_received ».
+     */
+    public function notificationTypes(): array
+    {
+        return ['message_received' => '✉'];
     }
 }
