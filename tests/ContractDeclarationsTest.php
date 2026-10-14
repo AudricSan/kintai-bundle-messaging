@@ -4,90 +4,96 @@ declare(strict_types=1);
 
 namespace kintai\Tests\Bundles\Messaging;
 
-use kintai\Contract\Extension\Action;
 use kintai\Contract\Extension\NavItem;
-use kintai\Core\Auth\PermissionCatalog;
-use kintai\Core\Container;
-use kintai\Core\Extension\Actions;
-use kintai\Core\Extension\Legacy\LegacyPendingRequests;
-use kintai\Core\Extension\Navigation;
-use kintai\Core\Extension\StoreFeatures;
+use kintai\Contract\Extension\StoreFeature;
 use kintai\Bundles\Installed\Messaging\MessagingBundle;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Les déclarations du bundle (contrat 1.11) reproduisent exactement ce que le Core affichait pour lui en repli : les
- * déclarer ne change rien à l'écran. Quand le repli du Core disparaîtra (étape 5 du plan du contrat), ce test pourra
- * être retiré.
+ * Ce que le bundle déclare au Core. Le Core n'a plus de repli pour messaging (étape 4 du plan du contrat,
+ * extraction) : ces déclarations sont la seule source de son entrée de menu (et de son badge), de sa catégorie de
+ * permissions, de sa fonctionnalité par magasin et de son type de notification, d'où des valeurs vérifiées une à une.
  */
 final class ContractDeclarationsTest extends TestCase
 {
-    private const SLUG = 'messaging';
-
     private function bundle(): MessagingBundle
     {
         return (new \ReflectionClass(MessagingBundle::class))->newInstanceWithoutConstructor();
     }
 
-    /** @param list<NavItem> $items */
-    private static function navShape(array $items): array
+    public function testNavigation(): void
     {
-        return array_map(static function (NavItem $i): array {
-            $v = get_object_vars($i);
-            $v['links'] = $v['links'] !== null;
-            return $v;
-        }, $items);
+        $items = $this->bundle()->navigation();
+
+        $this->assertCount(1, $items);
+        $this->assertInstanceOf(NavItem::class, $items[0]);
+        $this->assertSame('messages', $items[0]->key);
+        $this->assertSame(NavItem::REQUESTS, $items[0]->section);
+        $this->assertSame('messages', $items[0]->label);
+        $this->assertSame('admin.messages', $items[0]->managerRoute);
+        $this->assertSame('employee.messages', $items[0]->employeeRoute);
+        $this->assertSame('message', $items[0]->icon);
+        $this->assertSame(['/admin/messages', '/employee/messages'], $items[0]->activePaths);
+        $this->assertSame('messages', $items[0]->storeFeature);
+        $this->assertSame('unread_messages_count', $items[0]->badge);
+        $this->assertSame(40, $items[0]->order);
+        $this->assertTrue($items[0]->mobile);
     }
 
-    /** @param list<Action> $actions */
-    private static function actionShape(array $actions): array
+    public function testPermissions(): void
     {
-        $context = ['user_id' => 3, 'store_id' => 5, 'store_name' => 'S', 'period' => 30];
-        return array_map(static function (Action $a) use ($context): array {
-            $v = get_object_vars($a);
-            try {
-                $v['url'] = ($a->url)($context);
-            } catch (\Throwable $e) {
-                $v['url'] = $e::class;
+        $this->assertSame(['messaging' => ['view', 'send', 'delete']], $this->bundle()->permissions());
+    }
+
+    public function testStoreFeature(): void
+    {
+        $features = $this->bundle()->storeFeatures();
+
+        $this->assertCount(1, $features);
+        $this->assertInstanceOf(StoreFeature::class, $features[0]);
+        $this->assertSame('messages', $features[0]->key);
+        $this->assertSame('feature_messages', $features[0]->label);
+        $this->assertSame('feature_messages_desc', $features[0]->description);
+        $this->assertSame('💬', $features[0]->icon);
+        $this->assertSame(60, $features[0]->order);
+    }
+
+    /** Badge de la navigation : la variable que le Core lisait jusqu'ici lui-même. */
+    public function testViewVariables(): void
+    {
+        $this->assertSame(['unread_messages_count'], array_keys($this->bundle()->viewVariables()));
+    }
+
+    public function testNotificationTypes(): void
+    {
+        $this->assertSame(['message_received' => '✉'], $this->bundle()->notificationTypes());
+    }
+
+    /** Le bundle n'apporte rien d'autre au Core. */
+    public function testNoOtherContribution(): void
+    {
+        $bundle = $this->bundle();
+
+        $this->assertSame([], $bundle->dashboardWidgets());
+        $this->assertSame([], $bundle->actions());
+        $this->assertSame([], $bundle->profileSections());
+        $this->assertSame([], $bundle->cronJobs());
+        $this->assertSame([], $bundle->pendingRequestsProviders());
+        $this->assertSame([], $bundle->absenceProviders());
+        $this->assertSame([], $bundle->attendanceProviders());
+    }
+
+    /** Libellés des déclarations, des notifications et du journal d'activité, fournis par le bundle. */
+    public function testDeclaredLabelsAreTranslatedByTheBundle(): void
+    {
+        $keys = ['messages', 'perm_category_messaging', 'feature_messages', 'feature_messages_desc', 'notif_message_received',
+            'notif_message_received_body', 'notif_thread_message_received_body', 'audit_message_sent', 'audit_message_replied',
+            'audit_message_thread_deleted', 'audit_message_deleted'];
+        foreach (['fr', 'en', 'ja'] as $locale) {
+            $lang = json_decode((string) file_get_contents(dirname(__DIR__) . "/lang/{$locale}.json"), true);
+            foreach ($keys as $key) {
+                $this->assertNotEmpty($lang[$key] ?? null, "{$locale} : {$key}");
             }
-            return $v;
-        }, $actions);
-    }
-
-    public function testNavigationMatchesTheCoreFallback(): void
-    {
-        $this->assertEquals(self::navShape(Navigation::legacyBundleItems()[self::SLUG] ?? []), self::navShape($this->bundle()->navigation()));
-    }
-
-    public function testPermissionsMatchTheCoreFallback(): void
-    {
-        $expected = array_intersect_key(PermissionCatalog::CATEGORIES, array_flip(array_keys(PermissionCatalog::CATEGORY_BUNDLES, self::SLUG, true)));
-        $this->assertSame($expected, $this->bundle()->permissions());
-    }
-
-    public function testStoreFeaturesMatchTheCoreFallback(): void
-    {
-        $this->assertEquals(StoreFeatures::legacyBundleFeatures()[self::SLUG] ?? [], $this->bundle()->storeFeatures());
-    }
-
-    public function testActionsMatchTheCoreFallback(): void
-    {
-        $_SERVER['SCRIPT_NAME'] = '/index.php';
-        $this->assertEquals(self::actionShape(Actions::legacyBundleActions()[self::SLUG] ?? []), self::actionShape($this->bundle()->actions()));
-    }
-
-    public function testPendingRequestsProvidersMatchTheCoreFallback(): void
-    {
-        $legacy = LegacyPendingRequests::forBundles(Container::getInstance())[self::SLUG] ?? null;
-        $declared = $this->bundle()->pendingRequestsProviders();
-
-        if ($legacy === null) {
-            $this->assertSame([], $declared);
-            return;
-        }
-        $this->assertCount(1, $declared);
-        foreach (['key', 'label', 'emptyLabel', 'permission', 'storeFeature', 'order'] as $method) {
-            $this->assertSame($legacy->{$method}(), $declared[0]->{$method}(), $method);
         }
     }
 }

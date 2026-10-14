@@ -9,7 +9,7 @@ use kintai\Core\Repositories\StoreUserRepositoryInterface;
 use kintai\Bundles\Installed\Messaging\Controllers\Api\MessageController;
 use kintai\Core\Exceptions\ForbiddenException;
 use kintai\Core\Exceptions\NotFoundException;
-use kintai\Core\Repositories\MessageRepositoryInterface;
+use kintai\Bundles\Installed\Messaging\Repositories\MessageRepositoryInterface;
 use kintai\Core\Request;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;

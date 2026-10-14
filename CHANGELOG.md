@@ -10,6 +10,7 @@ Le schéma de version (X.Y.Z, canaux alpha/beta/main) est décrit dans
 
 ### Changed
 
+- Extraction du Core (étape 4 du plan du contrat) : le bundle possède désormais tout son code et ses données. Les modèles `MessageThread` / `ThreadMessage` / `ThreadParticipant` et le dépôt `MessageRepositoryInterface` / `DatabaseMessageRepository` (`src/Models`, `src/Repositories`) quittent le Core ; les tables `message_threads`, `thread_participants` et `thread_messages` gardent leur nom et leurs données, et une migration du bundle les crée si elles manquent (installation neuve). Le type de notification `message_received` est déclaré par le bundle (`notificationTypes()`) ; les libellés de l'entrée de menu, de la fonctionnalité, de la catégorie de permissions, des notifications, du journal d'activité et trois messages d'erreur passent dans `lang/`. `ContractUsageTest` n'admet plus aucune classe du Core hors contrat ; `ContractDeclarationsTest` vérifie chaque déclaration valeur par valeur. Nouveau test `MessagingMigrationTest`.
 - Contrat de bundle versionné : le bundle n'utilise plus que les noms du contrat `kintai\Contract\…` du Core (requête, réponse, routes, middlewares, exceptions, droits, données du Core, services, vues et composants) et déclare `"kintai_contract": "^1.0"` dans `bundle.json` (`kintai_core.min` relevé à `0.3.6`, première version du Core qui fournit le contrat). Nouveau test `ContractUsageTest` : toute utilisation du Core hors contrat échoue, hormis 2 classe(s) propre(s) au bundle qui vivent encore dans le Core (extraction prévue).
 
 ### Added

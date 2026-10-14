@@ -6,7 +6,7 @@ namespace kintai\Bundles\Installed\Messaging\Controllers\Web;
 
 use kintai\Contract\Exceptions\ForbiddenException;
 use kintai\Contract\Exceptions\NotFoundException;
-use kintai\Core\Repositories\MessageRepositoryInterface;
+use kintai\Bundles\Installed\Messaging\Repositories\MessageRepositoryInterface;
 use kintai\Contract\Data\StoreRepositoryInterface;
 use kintai\Contract\Data\StoreUserRepositoryInterface;
 use kintai\Contract\Data\UserRepositoryInterface;
