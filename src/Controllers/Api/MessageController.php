@@ -146,7 +146,7 @@ final class MessageController
             'thread_id'  => $threadId,
             'sender_id'  => $userId,
             'body'       => (string) ($request->json('body') ?? ''),
-            'created_at' => date('Y-m-d H:i:s'),
+            'sent_at'    => date('Y-m-d H:i:s'),
         ];
 
         return Response::json($this->messages->saveMessage($data), 201);
