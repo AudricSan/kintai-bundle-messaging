@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace kintai\Bundles\Installed\Messaging\Controllers\Web;
 
-use kintai\Core\Auth\AuthService;
-use kintai\Core\Exceptions\ForbiddenException;
-use kintai\Core\Exceptions\NotFoundException;
-use kintai\Core\Repositories\MessageRepositoryInterface;
-use kintai\Core\Repositories\UserRepositoryInterface;
-use kintai\Core\Request;
-use kintai\Core\Response;
+use kintai\Contract\Auth\AuthService;
+use kintai\Contract\Exceptions\ForbiddenException;
+use kintai\Contract\Exceptions\NotFoundException;
+use kintai\Bundles\Installed\Messaging\Repositories\MessageRepositoryInterface;
+use kintai\Contract\Data\UserRepositoryInterface;
+use kintai\Contract\Http\Request;
+use kintai\Contract\Http\Response;
 
 /**
  * Endpoint SSE : pousse les nouveaux messages d'un thread au client en temps réel.

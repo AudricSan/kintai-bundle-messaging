@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace kintai\Bundles\Installed\Messaging\Controllers\Api;
 
-use kintai\Core\Exceptions\ForbiddenException;
-use kintai\Core\Exceptions\NotFoundException;
-use kintai\Core\Repositories\MessageRepositoryInterface;
-use kintai\Core\Repositories\StoreUserRepositoryInterface;
-use kintai\Core\Request;
-use kintai\Core\Response;
+use kintai\Contract\Exceptions\ForbiddenException;
+use kintai\Contract\Exceptions\NotFoundException;
+use kintai\Bundles\Installed\Messaging\Repositories\MessageRepositoryInterface;
+use kintai\Contract\Data\StoreUserRepositoryInterface;
+use kintai\Contract\Http\Request;
+use kintai\Contract\Http\Response;
 
 /**
  * Messagerie API — strictement limitée aux conversations dont le porteur du
@@ -146,7 +146,7 @@ final class MessageController
             'thread_id'  => $threadId,
             'sender_id'  => $userId,
             'body'       => (string) ($request->json('body') ?? ''),
-            'created_at' => date('Y-m-d H:i:s'),
+            'sent_at'    => date('Y-m-d H:i:s'),
         ];
 
         return Response::json($this->messages->saveMessage($data), 201);

@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace kintai\Bundles\Installed\Messaging;
 
-use kintai\Core\BundleContract\Bundle;
-use kintai\Core\Repositories\MessageRepositoryInterface;
-use kintai\Core\Repositories\DatabaseMessageRepository;
+use kintai\Contract\Bundle;
+use kintai\Contract\Container;
+use kintai\Contract\Extension\NavItem;
+use kintai\Contract\Extension\StoreFeature;
+use kintai\Bundles\Installed\Messaging\Repositories\DatabaseMessageRepository;
+use kintai\Bundles\Installed\Messaging\Repositories\MessageRepositoryInterface;
 
 final class MessagingBundle extends Bundle
 {
@@ -17,7 +20,7 @@ final class MessagingBundle extends Bundle
 
     public function getVersion(): string
     {
-        return '1.1.0';
+        return '1.2.0';
     }
 
     public function getLabel(): string
@@ -46,5 +49,58 @@ final class MessagingBundle extends Bundle
             MessageRepositoryInterface::class,
             fn() => new DatabaseMessageRepository()
         );
+    }
+
+    /**
+     * Navigation (contrat 1.1) : entrée(s) de la barre du haut et de la barre mobile.
+     */
+    public function navigation(): array
+    {
+        return [
+            new NavItem('messages', NavItem::REQUESTS, 'messages', 'admin.messages', 'employee.messages',
+                icon: 'message', activePaths: ['/admin/messages', '/employee/messages'],
+                storeFeature: 'messages', badge: 'unread_messages_count', order: 40, mobile: true),
+        ];
+    }
+
+    /**
+     * Catégories de permissions (contrat 1.2), proposées sur la page des rôles.
+     */
+    public function permissions(): array
+    {
+        return ['messaging' => ['view', 'send', 'delete']];
+    }
+
+    /**
+     * Fonctionnalité activable par magasin (contrat 1.3), sur la fiche magasin.
+     */
+    public function storeFeatures(): array
+    {
+        return [new StoreFeature('messages', 'feature_messages', 'feature_messages_desc', '💬', 60)];
+    }
+
+    /**
+     * Variables partagées avec les vues des pages authentifiées (contrat 1.5).
+     */
+    public function viewVariables(): array
+    {
+        return [
+            // Badge des messages non lus dans la navigation (NavItem::$badge).
+            'unread_messages_count' => static function (array $user): int {
+                try {
+                    return Container::getInstance()->make(MessageRepositoryInterface::class)->countUnread((int) $user['id']);
+                } catch (\Throwable) {
+                    return 0; // table pas encore créée
+                }
+            },
+        ];
+    }
+
+    /**
+     * Type de notification (contrat 1.7) : nouveau message reçu ; libellé « notif_message_received ».
+     */
+    public function notificationTypes(): array
+    {
+        return ['message_received' => '✉'];
     }
 }
