@@ -1,4 +1,5 @@
 {
+    "audit_message_thread_hidden": "Thread removed from own list",
     "audit_message_deleted": "Message deleted",
     "audit_message_replied": "Message replied",
     "audit_message_sent": "Message sent",
@@ -6,7 +7,7 @@
     "bundle_messaging": "Messaging",
     "bundle_messaging_desc": "Internal messaging between store members.",
     "confirm_delete_message": "Delete this message?",
-    "confirm_delete_thread": "Delete the entire conversation? This action cannot be undone.",
+    "confirm_delete_thread": "Remove this conversation from your list? The other participants keep it; it will come back if someone replies.",
     "delete_message": "Delete this message",
     "delete_thread": "Delete conversation",
     "error_delete_own_messages_only": "You can only delete your own messages.",
@@ -33,6 +34,6 @@
     "select_multiple_hint": "Ctrl+click to select multiple recipients.",
     "sent": "Sent",
     "subject": "Subject",
-    "thread_deleted": "Conversation deleted.",
+    "thread_deleted": "Conversation removed from your list.",
     "unread": "Unread"
 }

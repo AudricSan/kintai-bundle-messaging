@@ -7,6 +7,7 @@ namespace kintai\Bundles\Installed\Messaging\Controllers\Api;
 use kintai\Contract\Exceptions\ForbiddenException;
 use kintai\Contract\Exceptions\NotFoundException;
 use kintai\Bundles\Installed\Messaging\Repositories\MessageRepositoryInterface;
+use kintai\Bundles\Installed\Messaging\Services\ThreadVisibility;
 use kintai\Contract\Data\StoreUserRepositoryInterface;
 use kintai\Contract\Http\Request;
 use kintai\Contract\Http\Response;
@@ -50,6 +51,9 @@ final class MessageController
         $participations = $this->messages->findParticipationsByUser($userId);
         $threads        = [];
         foreach ($participations as $p) {
+            if (!ThreadVisibility::isVisible($p)) {
+                continue;
+            }
             $thread = $this->messages->findThreadById((int) $p['thread_id']);
             if ($thread !== null) {
                 $threads[] = $thread;
@@ -114,11 +118,10 @@ final class MessageController
     public function deleteThread(Request $request): Response
     {
         $threadId = (int) $request->param('id');
-        $this->requireThreadParticipant($request, $threadId);
+        $userId = $this->requireThreadParticipantId($request, $threadId);
 
-        $this->messages->deleteMessagesByThread($threadId);
-        $this->messages->deleteParticipantsByThread($threadId);
-        $this->messages->deleteThread($threadId);
+        // Masquée pour l'appelant seulement ; effacée quand plus personne ne la voit (même règle que le web).
+        (new ThreadVisibility($this->messages))->hideFor($threadId, $userId);
 
         return Response::empty();
     }
@@ -149,7 +152,15 @@ final class MessageController
             'sent_at'    => date('Y-m-d H:i:s'),
         ];
 
-        return Response::json($this->messages->saveMessage($data), 201);
+        $saved = $this->messages->saveMessage($data);
+        // Comme une réponse web : non lue, et de retour dans la liste de ceux qui l'avaient masquée.
+        foreach ($this->messages->findParticipantsByThread($threadId) as $p) {
+            if ((int) $p['user_id'] !== $userId) {
+                $this->messages->saveParticipant(ThreadVisibility::reveal($p));
+            }
+        }
+
+        return Response::json($saved, 201);
     }
 
     /** DELETE /api/v1/messages/{id} */
