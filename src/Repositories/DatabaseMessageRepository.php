@@ -114,6 +114,7 @@ final class DatabaseMessageRepository implements MessageRepositoryInterface
     {
         return EloquentThreadParticipant::where('user_id', $userId)
             ->where('is_read', 0)
+            ->whereNull('hidden_at')
             ->count();
     }
 }

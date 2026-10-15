@@ -1,4 +1,5 @@
 {
+    "audit_message_thread_hidden": "スレッドを自分の一覧から削除",
     "audit_message_deleted": "メッセージ削除",
     "audit_message_replied": "返信送信",
     "audit_message_sent": "メッセージ送信",
@@ -6,7 +7,7 @@
     "bundle_messaging": "メッセージング",
     "bundle_messaging_desc": "店舗メンバー間の内部メッセージング。",
     "confirm_delete_message": "このメッセージを削除しますか？",
-    "confirm_delete_thread": "スレッド全体を削除しますか？この操作は元に戻せません。",
+    "confirm_delete_thread": "このスレッドを一覧から削除しますか？他の参加者には残ります。誰かが返信すると再び表示されます。",
     "delete_message": "このメッセージを削除",
     "delete_thread": "スレッドを削除",
     "error_delete_own_messages_only": "自分自身のメッセージのみ削除できます。",
@@ -33,6 +34,6 @@
     "select_multiple_hint": "Ctrl+クリックで複数の宛先を選択できます。",
     "sent": "送信済み",
     "subject": "件名",
-    "thread_deleted": "スレッドを削除しました。",
+    "thread_deleted": "スレッドを一覧から削除しました。",
     "unread": "未読"
 }

@@ -18,7 +18,7 @@ use PHPUnit\Framework\TestCase;
  */
 final class MessagingMigrationTest extends TestCase
 {
-    private const MIGRATIONS = ['2026_10_14_000001_create_messaging_tables', '2026_10_14_000002_align_messaging_schema'];
+    private const MIGRATIONS = ['2026_10_14_000001_create_messaging_tables', '2026_10_14_000002_align_messaging_schema', '2026_10_15_000001_add_hidden_at_to_thread_participants'];
 
     private function migrationsPath(): string
     {
@@ -95,7 +95,7 @@ final class MessagingMigrationTest extends TestCase
         foreach (['id', 'store_id', 'creator_id', 'subject', 'type', 'last_message_at', 'created_at', 'updated_at'] as $c) {
             $this->assertTrue($schema->hasColumn('message_threads', $c), "message_threads.{$c}");
         }
-        foreach (['id', 'thread_id', 'user_id', 'is_read', 'last_read_at', 'created_at'] as $c) {
+        foreach (['id', 'thread_id', 'user_id', 'is_read', 'last_read_at', 'created_at', 'hidden_at'] as $c) {
             $this->assertTrue($schema->hasColumn('thread_participants', $c), "thread_participants.{$c}");
         }
         foreach (['id', 'thread_id', 'sender_id', 'body', 'sent_at'] as $c) {
