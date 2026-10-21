@@ -25,7 +25,10 @@ final class MessageThreadNotificationsTest extends TestCase
             mkdir($dir, 0777, true);
         }
         touch($dir . '/messages-thread.php');
-        touch(sys_get_temp_dir() . '/layout.app.php');
+        if (!is_dir(sys_get_temp_dir() . '/layout')) {
+            mkdir(sys_get_temp_dir() . '/layout', 0777, true);
+        }
+        touch(sys_get_temp_dir() . '/layout/app.php');
 
         $view = new ViewRenderer(sys_get_temp_dir());
         $view->addNamespace('messaging', $dir);
