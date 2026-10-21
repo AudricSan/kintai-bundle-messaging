@@ -66,7 +66,15 @@ final class ContractDeclarationsTest extends TestCase
 
     public function testNotificationTypes(): void
     {
-        $this->assertSame(['message_received' => '✉'], $this->bundle()->notificationTypes());
+        $declared = $this->bundle()->notificationTypes();
+        $this->assertSame(['message_received'], array_keys($declared));
+
+        // Déclaration valide pour le Core (format enrichi du contrat 1.23).
+        $type = \kintai\Contract\Extension\NotificationType::fromDeclaration('message_received', $declared['message_received']);
+        $this->assertSame('messages', $type->category);
+        $this->assertSame('message_thread', $type->referenceType);
+        $this->assertTrue($type->push);
+        $this->assertFalse($type->email);
     }
 
     /** Le bundle n'apporte rien d'autre au Core. */
