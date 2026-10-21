@@ -97,10 +97,13 @@ final class MessagingBundle extends Bundle
     }
 
     /**
-     * Type de notification (contrat 1.7) : nouveau message reçu ; libellé « notif_message_received ».
+     * Type de notification : nouveau message reçu ; libellé « notif_message_received ». Format enrichi (contrat 1.23) :
+     * catégorie « messages », push par défaut, pas d'e-mail ; l'identifiant passé à notify() est celui du fil.
      */
     public function notificationTypes(): array
     {
-        return ['message_received' => '✉'];
+        return [
+            'message_received' => ['icon' => '✉', 'category' => 'messages', 'channels' => ['push' => true, 'email' => false], 'reference_type' => 'message_thread'],
+        ];
     }
 }

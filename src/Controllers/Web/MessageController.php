@@ -213,6 +213,8 @@ final class MessageController
         if (!(int) ($part['is_read'] ?? 0)) {
             $this->msgRepo->saveParticipant(array_merge($part, ['is_read' => 1]));
         }
+        // Le fil est ouvert : ses notifications de nouveau message sont lues.
+        $this->notifs->markReadFor($userId, 'message_thread', $threadId);
 
         $msgs = $this->msgRepo->findMessagesByThread($threadId);
         usort($msgs, fn($a, $b) => strcmp($a['sent_at'], $b['sent_at']));
