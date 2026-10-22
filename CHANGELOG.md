@@ -8,6 +8,10 @@ Le schéma de version (X.Y.Z, canaux alpha/beta/main) est décrit dans
 
 ## [Unreleased]
 
+### Added
+
+- Contrat de bundle 1.24 : `ContractUsageTest` vérifie aussi que le bundle n'appelle que des fonctions globales déclarées par le contrat (`ContractUsageScanner::functionViolations()`).
+
 ### Changed
 
 - Notifications (contrat 1.23, `kintai_contract` `^1.23`) : type `message_received` déclaré au format enrichi (catégorie « messages », push par défaut, `reference_type` `message_thread`) ; ouvrir une conversation marque comme lues ses notifications de nouveau message.
