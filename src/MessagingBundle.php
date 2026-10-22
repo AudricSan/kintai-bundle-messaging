@@ -57,7 +57,7 @@ final class MessagingBundle extends Bundle
     public function navigation(): array
     {
         return [
-            new NavItem('messages', NavItem::REQUESTS, 'messages', 'admin.messages', 'employee.messages',
+            new NavItem('messages', NavItem::REQUESTS, 'messaging_messages', 'admin.messages', 'employee.messages',
                 icon: 'message', activePaths: ['/admin/messages', '/employee/messages'],
                 storeFeature: 'messages', badge: 'unread_messages_count', order: 40, mobile: true),
         ];
@@ -76,7 +76,7 @@ final class MessagingBundle extends Bundle
      */
     public function storeFeatures(): array
     {
-        return [new StoreFeature('messages', 'feature_messages', 'feature_messages_desc', '💬', 60)];
+        return [new StoreFeature('messages', 'messaging_feature_messages', 'messaging_feature_messages_desc', '💬', 60)];
     }
 
     /**
