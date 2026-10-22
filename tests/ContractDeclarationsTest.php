@@ -29,7 +29,7 @@ final class ContractDeclarationsTest extends TestCase
         $this->assertInstanceOf(NavItem::class, $items[0]);
         $this->assertSame('messages', $items[0]->key);
         $this->assertSame(NavItem::REQUESTS, $items[0]->section);
-        $this->assertSame('messages', $items[0]->label);
+        $this->assertSame('messaging_messages', $items[0]->label);
         $this->assertSame('admin.messages', $items[0]->managerRoute);
         $this->assertSame('employee.messages', $items[0]->employeeRoute);
         $this->assertSame('message', $items[0]->icon);
@@ -52,8 +52,8 @@ final class ContractDeclarationsTest extends TestCase
         $this->assertCount(1, $features);
         $this->assertInstanceOf(StoreFeature::class, $features[0]);
         $this->assertSame('messages', $features[0]->key);
-        $this->assertSame('feature_messages', $features[0]->label);
-        $this->assertSame('feature_messages_desc', $features[0]->description);
+        $this->assertSame('messaging_feature_messages', $features[0]->label);
+        $this->assertSame('messaging_feature_messages_desc', $features[0]->description);
         $this->assertSame('💬', $features[0]->icon);
         $this->assertSame(60, $features[0]->order);
     }
@@ -94,7 +94,7 @@ final class ContractDeclarationsTest extends TestCase
     /** Libellés des déclarations, des notifications et du journal d'activité, fournis par le bundle. */
     public function testDeclaredLabelsAreTranslatedByTheBundle(): void
     {
-        $keys = ['messages', 'perm_category_messaging', 'feature_messages', 'feature_messages_desc', 'notif_message_received',
+        $keys = ['messaging_messages', 'perm_category_messaging', 'messaging_feature_messages', 'messaging_feature_messages_desc', 'notif_message_received',
             'notif_message_received_body', 'notif_thread_message_received_body', 'audit_message_sent', 'audit_message_replied',
             'audit_message_thread_deleted', 'audit_message_deleted'];
         foreach (['fr', 'en', 'ja'] as $locale) {

@@ -341,10 +341,10 @@ final class MessageController
 
         $message = $this->msgRepo->findMessageById($mid);
         if ($message === null || (int) $message['thread_id'] !== $threadId) {
-            throw new NotFoundException(__('error_message_not_found'));
+            throw new NotFoundException(__('messaging_error_message_not_found'));
         }
         if ((int) $message['sender_id'] !== $userId) {
-            throw new ForbiddenException(__('error_delete_own_messages_only'));
+            throw new ForbiddenException(__('messaging_error_delete_own_messages_only'));
         }
 
         $this->msgRepo->deleteMessage($mid);
