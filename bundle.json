@@ -1,7 +1,7 @@
 {
     "slug": "messaging",
     "name": "Messagerie",
-    "version": "1.2.0",
+    "version": "2.0.0",
     "description": "Messagerie interne entre membres des magasins.",
     "author": {
         "name": "AudricSan",
