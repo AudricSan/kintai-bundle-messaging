@@ -4,17 +4,18 @@ declare(strict_types=1);
 
 namespace kintai\Bundles\Installed\Messaging\Controllers\Web;
 
-use kintai\Core\Exceptions\ForbiddenException;
-use kintai\Core\Exceptions\NotFoundException;
-use kintai\Core\Repositories\MessageRepositoryInterface;
-use kintai\Core\Repositories\StoreRepositoryInterface;
-use kintai\Core\Repositories\StoreUserRepositoryInterface;
-use kintai\Core\Repositories\UserRepositoryInterface;
-use kintai\Core\Request;
-use kintai\Core\Response;
-use kintai\Core\Services\AuditLogger;
-use kintai\Core\Services\NotificationService;
-use kintai\UI\ViewRenderer;
+use kintai\Contract\Exceptions\ForbiddenException;
+use kintai\Contract\Exceptions\NotFoundException;
+use kintai\Bundles\Installed\Messaging\Repositories\MessageRepositoryInterface;
+use kintai\Bundles\Installed\Messaging\Services\ThreadVisibility;
+use kintai\Contract\Data\StoreRepositoryInterface;
+use kintai\Contract\Data\StoreUserRepositoryInterface;
+use kintai\Contract\Data\UserRepositoryInterface;
+use kintai\Contract\Http\Request;
+use kintai\Contract\Http\Response;
+use kintai\Contract\Services\AuditLogger;
+use kintai\Contract\Services\NotificationService;
+use kintai\Contract\View\ViewRenderer;
 
 /**
  * Messagerie interne — partagée entre les routes admin/manager (/admin/messages)
@@ -54,6 +55,10 @@ final class MessageController
 
         $threads = [];
         foreach ($participations as $p) {
+            // Conversation masquée par cet utilisateur (« supprimée » de sa liste).
+            if (!ThreadVisibility::isVisible($p)) {
+                continue;
+            }
             $tid    = (int) $p['thread_id'];
             $thread = $this->msgRepo->findThreadById($tid);
             if ($thread === null) {
@@ -208,6 +213,8 @@ final class MessageController
         if (!(int) ($part['is_read'] ?? 0)) {
             $this->msgRepo->saveParticipant(array_merge($part, ['is_read' => 1]));
         }
+        // Le fil est ouvert : ses notifications de nouveau message sont lues.
+        $this->notifs->markReadFor($userId, 'message_thread', $threadId);
 
         $msgs = $this->msgRepo->findMessagesByThread($threadId);
         usort($msgs, fn($a, $b) => strcmp($a['sent_at'], $b['sent_at']));
@@ -260,7 +267,8 @@ final class MessageController
         $otherParticipants = [];
         foreach ($this->msgRepo->findParticipantsByThread($threadId) as $p) {
             if ((int) $p['user_id'] !== $userId) {
-                $this->msgRepo->saveParticipant(array_merge($p, ['is_read' => 0]));
+                // Non lue, et de retour dans la liste de ceux qui l'avaient masquée.
+                $this->msgRepo->saveParticipant(ThreadVisibility::reveal($p));
                 $otherParticipants[] = (int) $p['user_id'];
             }
         }
@@ -305,15 +313,14 @@ final class MessageController
             throw new ForbiddenException(__('error_not_in_conversation'));
         }
 
+        // Masquée pour cet utilisateur seulement (avant : effacée pour tous les participants) ; effacée de la base
+        // quand plus personne ne la voit.
+        $erased  = (new ThreadVisibility($this->msgRepo))->hideFor($threadId, $userId);
         $storeId = (int) ($thread['store_id'] ?? 0);
-        $this->auditLogger->log($request, 'message.thread_deleted', 'message_thread', $threadId, [
+        $this->auditLogger->log($request, $erased ? 'message.thread_deleted' : 'message.thread_hidden', 'message_thread', $threadId, [
             'store_id' => $storeId ?: null,
             'subject'  => $thread['subject'] ?? '',
         ], $storeId ?: null);
-
-        $this->msgRepo->deleteMessagesByThread($threadId);
-        $this->msgRepo->deleteParticipantsByThread($threadId);
-        $this->msgRepo->deleteThread($threadId);
 
         return Response::redirect($this->base() . $urlPrefix . '?success=deleted');
     }
@@ -334,10 +341,10 @@ final class MessageController
 
         $message = $this->msgRepo->findMessageById($mid);
         if ($message === null || (int) $message['thread_id'] !== $threadId) {
-            throw new NotFoundException(__('error_message_not_found'));
+            throw new NotFoundException(__('messaging_error_message_not_found'));
         }
         if ((int) $message['sender_id'] !== $userId) {
-            throw new ForbiddenException(__('error_delete_own_messages_only'));
+            throw new ForbiddenException(__('messaging_error_delete_own_messages_only'));
         }
 
         $this->msgRepo->deleteMessage($mid);

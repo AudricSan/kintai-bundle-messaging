@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-use kintai\Core\Middleware\AuthMiddleware;
-use kintai\Core\Middleware\ApiAuthMiddleware;
-use kintai\Core\Middleware\PermissionMiddleware;
+use kintai\Contract\Http\Middleware\AuthMiddleware;
+use kintai\Contract\Http\Middleware\ApiAuthMiddleware;
+use kintai\Contract\Http\Middleware\PermissionMiddleware;
 use kintai\Bundles\Installed\Messaging\Controllers\Web\MessageController;
 use kintai\Bundles\Installed\Messaging\Controllers\Web\MessageStreamController;
 use kintai\Bundles\Installed\Messaging\Controllers\Api\MessageController as ApiMessageController;
 
-/** @var kintai\Core\Router $router */
-/** @var kintai\Core\Container $container */
+/** @var kintai\Contract\Http\Router $router */
+/** @var kintai\Contract\Container $container */
 
 // =============================================================================
 // Messaging — SSE Stream

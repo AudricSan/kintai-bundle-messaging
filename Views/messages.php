@@ -6,37 +6,40 @@
 /** @var int      $user_id     ID de l'utilisateur connecté */
 /** @var string   $base_path   '/admin/messages' ou '/employee/messages' */
 ?>
+<?php if ($messagingCss = bundle_asset('messaging', 'css/messaging.css')): ?>
+<link rel="stylesheet" href="<?= $messagingCss ?>">
+<?php endif; ?>
 
-<?= \kintai\UI\Components\Flash::fromQuery('success', ['deleted' => __('thread_deleted')])->render() ?>
+<?= \kintai\Contract\View\Components\Flash::fromQuery('success', ['deleted' => __('messaging_thread_deleted')])->render() ?>
 
 <div class="page-header">
-    <h2 class="page-header__title"><?= __('messages') ?> <span class="page-count">(<?= count($threads) ?>)</span></h2>
+    <h2 class="page-header__title"><?= __('messaging_messages') ?> <span class="page-count">(<?= count($threads) ?>)</span></h2>
     <div class="page-header__actions">
-        <a href="<?= $BASE_URL . $base_path ?>/compose" class="btn btn--primary"><?= __('new_message') ?></a>
+        <a href="<?= $BASE_URL . $base_path ?>/compose" class="btn btn--primary"><?= __('messaging_new_message') ?></a>
     </div>
 </div>
 
 <!-- Onglets -->
 <div class="tab-bar mb-sm">
-    <a href="?tab=inbox"  class="tab-bar__item <?= $tab === 'inbox'  ? 'tab-bar__item--active' : '' ?>"><?= __('inbox') ?></a>
-    <a href="?tab=sent"   class="tab-bar__item <?= $tab === 'sent'   ? 'tab-bar__item--active' : '' ?>"><?= __('sent') ?></a>
-    <a href="?tab=unread" class="tab-bar__item <?= $tab === 'unread' ? 'tab-bar__item--active' : '' ?>"><?= __('unread') ?></a>
+    <a href="?tab=inbox"  class="tab-bar__item <?= $tab === 'inbox'  ? 'tab-bar__item--active' : '' ?>"><?= __('messaging_inbox') ?></a>
+    <a href="?tab=sent"   class="tab-bar__item <?= $tab === 'sent'   ? 'tab-bar__item--active' : '' ?>"><?= __('messaging_sent') ?></a>
+    <a href="?tab=unread" class="tab-bar__item <?= $tab === 'unread' ? 'tab-bar__item--active' : '' ?>"><?= __('messaging_unread') ?></a>
 </div>
 
 <div class="card">
     <?php if (empty($threads)): ?>
-        <div class="empty-state"><?= __('no_messages') ?></div>
+        <div class="empty-state"><?= __('messaging_no_messages') ?></div>
     <?php else: ?>
         <div class="table-wrap">
             <table class="data-table" data-mob-stack>
                 <thead>
                     <tr>
                         <th></th>
-                        <th><?= __('subject') ?></th>
+                        <th><?= __('messaging_subject') ?></th>
                         <th><?= $tab === 'sent' ? __('to') : __('from') ?></th>
                         <th><?= __('store') ?></th>
                         <th><?= __('date') ?></th>
-                        <th><?= __('messages') ?></th>
+                        <th><?= __('messaging_messages') ?></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -58,10 +61,10 @@
                         <tr class="<?= !$isRead ? 'tr--unread' : '' ?>">
                             <td class="td-indicator">
                                 <?php if (!$isRead): ?>
-                                    <span class="badge badge--primary badge--dot" title="<?= __('unread') ?>"></span>
+                                    <span class="badge badge--primary badge--dot" title="<?= __('messaging_unread') ?>"></span>
                                 <?php endif; ?>
                             </td>
-                            <td data-label="<?= htmlspecialchars(__('subject')) ?>">
+                            <td data-label="<?= htmlspecialchars(__('messaging_subject')) ?>">
                                 <a href="<?= $BASE_URL . $base_path ?>/<?= (int) $thread['id'] ?>" class="link-subject <?= !$isRead ? 'link-subject--bold' : '' ?>">
                                     <?= htmlspecialchars($thread['subject'] ?? '') ?>
                                 </a>
@@ -69,7 +72,7 @@
                             <td data-label="<?= htmlspecialchars($fromToLabel) ?>"><?= $counterpart ?></td>
                             <td data-label="<?= htmlspecialchars(__('store')) ?>"><?= htmlspecialchars($stores_map[(int) ($thread['store_id'] ?? 0)] ?? '—') ?></td>
                             <td data-label="<?= htmlspecialchars(__('date')) ?>" class="td-date-muted"><?= $lastDate ?></td>
-                            <td data-label="<?= htmlspecialchars(__('messages')) ?>" class="td-mono"><?= (int) ($thread['_msg_count'] ?? 0) ?></td>
+                            <td data-label="<?= htmlspecialchars(__('messaging_messages')) ?>" class="td-mono"><?= (int) ($thread['_msg_count'] ?? 0) ?></td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>

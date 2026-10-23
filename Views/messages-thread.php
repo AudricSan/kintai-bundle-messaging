@@ -14,17 +14,20 @@ $participantNames = array_map(
 );
 $_canManage = $can_manage ?? true;
 ?>
+<?php if ($messagingCss = bundle_asset('messaging', 'css/messaging.css')): ?>
+<link rel="stylesheet" href="<?= $messagingCss ?>">
+<?php endif; ?>
 
-<?= \kintai\UI\Components\Flash::fromQuery('success', ['sent' => __('message_sent'), 'replied' => __('message_replied')])->render() ?>
+<?= \kintai\Contract\View\Components\Flash::fromQuery('success', ['sent' => __('messaging_message_sent'), 'replied' => __('messaging_message_replied')])->render() ?>
 
 <div class="page-header">
     <h2 class="page-header__title"><?= htmlspecialchars($thread['subject'] ?? '') ?></h2>
     <div class="page-header__actions">
         <a href="<?= back_url($BASE_URL . $base_path) ?>" class="btn btn--ghost">← <?= __('back') ?></a>
         <form method="POST" action="<?= $BASE_URL . $base_path ?>/<?= (int) $thread['id'] ?>/delete"
-              data-confirm="<?= htmlspecialchars(__('confirm_delete_thread'), ENT_QUOTES) ?>">
+              data-confirm="<?= htmlspecialchars(__('messaging_confirm_delete_thread'), ENT_QUOTES) ?>">
             <?= csrf_field() ?>
-            <button type="submit" class="btn btn--danger btn--sm"><?= __('delete_thread') ?></button>
+            <button type="submit" class="btn btn--danger btn--sm"><?= __('messaging_delete_thread') ?></button>
         </form>
     </div>
 </div>
@@ -32,7 +35,7 @@ $_canManage = $can_manage ?? true;
 <div class="text-sm-muted mb-sm">
     <?= __('store') ?>: <strong><?= htmlspecialchars($stores_map[(int) ($thread['store_id'] ?? 0)] ?? '—') ?></strong>
     &nbsp;·&nbsp;
-    <?= __('participants') ?>: <?= implode(', ', $participantNames) ?>
+    <?= __('messaging_participants') ?>: <?= implode(', ', $participantNames) ?>
 </div>
 
 <div id="msg-meta"
@@ -54,9 +57,9 @@ $_canManage = $can_manage ?? true;
                     <form method="POST"
                           action="<?= $BASE_URL . $base_path ?>/<?= (int) $thread['id'] ?>/message/<?= (int) $msg['id'] ?>/delete"
                           class="msg-delete-form"
-                          data-confirm="<?= htmlspecialchars(__('confirm_delete_message'), ENT_QUOTES) ?>">
+                          data-confirm="<?= htmlspecialchars(__('messaging_confirm_delete_message'), ENT_QUOTES) ?>">
                         <?= csrf_field() ?>
-                        <button type="submit" class="btn-msg-delete" title="<?= __('delete_message') ?>">✕</button>
+                        <button type="submit" class="btn-msg-delete" title="<?= __('messaging_delete_message') ?>">✕</button>
                     </form>
                 <?php endif; ?>
             </div>
@@ -72,8 +75,8 @@ $_canManage = $can_manage ?? true;
             <?= csrf_field() ?>
             <div class="form-stack">
                 <div class="form-group">
-                    <label class="form-label form-label--required"><?= __('reply') ?></label>
-                    <textarea name="body" class="form-control" rows="4" required placeholder="<?= __('message_reply_placeholder') ?>"></textarea>
+                    <label class="form-label form-label--required"><?= __('messaging_reply') ?></label>
+                    <textarea name="body" class="form-control" rows="4" required placeholder="<?= __('messaging_message_reply_placeholder') ?>"></textarea>
                 </div>
                 <div class="form-actions">
                     <button type="submit" class="btn btn--primary"><?= __('send') ?></button>
@@ -83,4 +86,6 @@ $_canManage = $can_manage ?? true;
     </div>
 </div>
 
-<script src="<?= $BASE_URL ?>/assets/js/modules/message-stream.js"></script>
+<?php if ($messageStreamJs = bundle_asset('messaging', 'js/message-stream.js')): ?>
+<script src="<?= $messageStreamJs ?>"></script>
+<?php endif; ?>
