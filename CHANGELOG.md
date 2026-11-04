@@ -8,7 +8,23 @@ Le schéma de version (X.Y.Z, canaux alpha/beta/main) est décrit dans
 
 ## [Unreleased]
 
+### Fixed
+- **Comptes supprimés** : le sélecteur de destinataires d'un nouveau fil ne propose plus un compte supprimé (anonymisé, ligne conservée comme tombstone) ; l'historique reste affiché sous le compte anonymisé.
+
+## [2.0.0] - 2026-10-23
+
+Première version stable de la ligne 2 : elle regroupe, à l'identique, tout ce qui a été publié en alpha et en bêta depuis la ligne 1 (voir les sections ci-dessous), sans changement fonctionnel propre à cette version.
+
 ### Changed
+- **Traductions conformes au contrat** : 26 clés renommées avec le préfixe du bundle (`messaging_…`), sans changement de texte affiché ; `tests/TranslationContractTest.php` impose désormais parité fr/en/ja, préfixe, collisions et clés connues.
+
+### Added
+
+- Contrat de bundle 1.24 : `ContractUsageTest` vérifie aussi que le bundle n'appelle que des fonctions globales déclarées par le contrat (`ContractUsageScanner::functionViolations()`).
+
+### Changed
+
+- Notifications (contrat 1.23, `kintai_contract` `^1.23`) : type `message_received` déclaré au format enrichi (catégorie « messages », push par défaut, `reference_type` `message_thread`) ; ouvrir une conversation marque comme lues ses notifications de nouveau message.
 
 - Tests : plus aucun avis PHPUnit (12 auparavant) — les doublures sans attente sont des bouchons (`createStub()`), les mocks ne sont créés que dans les tests qui posent une attente, et les vérifications `->with()` sont conservées (`expects($this->atLeastOnce())`, ou `willReturnCallback()` par argument dans les méthodes utilitaires).
 - Supprimer une conversation (web ou API) la retire désormais de **sa propre** liste seulement : avant, n'importe quel participant l'effaçait pour tous, messages compris. Elle réapparaît (non lue) si quelqu'un y répond, et n'est effacée de la base que lorsque tous ses participants l'ont retirée. Nouvelle colonne `thread_participants.hidden_at` ; une conversation retirée ne compte plus dans les non-lus. Un message envoyé par l'API marque aussi la conversation non lue chez les autres participants, comme une réponse web. Textes de confirmation mis à jour (fr/en/ja).

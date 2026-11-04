@@ -57,7 +57,7 @@ final class MessagingBundle extends Bundle
     public function navigation(): array
     {
         return [
-            new NavItem('messages', NavItem::REQUESTS, 'messages', 'admin.messages', 'employee.messages',
+            new NavItem('messages', NavItem::REQUESTS, 'messaging_messages', 'admin.messages', 'employee.messages',
                 icon: 'message', activePaths: ['/admin/messages', '/employee/messages'],
                 storeFeature: 'messages', badge: 'unread_messages_count', order: 40, mobile: true),
         ];
@@ -76,7 +76,7 @@ final class MessagingBundle extends Bundle
      */
     public function storeFeatures(): array
     {
-        return [new StoreFeature('messages', 'feature_messages', 'feature_messages_desc', '💬', 60)];
+        return [new StoreFeature('messages', 'messaging_feature_messages', 'messaging_feature_messages_desc', '💬', 60)];
     }
 
     /**
@@ -97,10 +97,13 @@ final class MessagingBundle extends Bundle
     }
 
     /**
-     * Type de notification (contrat 1.7) : nouveau message reçu ; libellé « notif_message_received ».
+     * Type de notification : nouveau message reçu ; libellé « notif_message_received ». Format enrichi (contrat 1.23) :
+     * catégorie « messages », push par défaut, pas d'e-mail ; l'identifiant passé à notify() est celui du fil.
      */
     public function notificationTypes(): array
     {
-        return ['message_received' => '✉'];
+        return [
+            'message_received' => ['icon' => '✉', 'category' => 'messages', 'channels' => ['push' => true, 'email' => false], 'reference_type' => 'message_thread'],
+        ];
     }
 }
