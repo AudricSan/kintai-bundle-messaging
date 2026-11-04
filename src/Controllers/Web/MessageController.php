@@ -115,12 +115,12 @@ final class MessageController
             $memberIds = $this->memberUserIds($managedIds);
             $users     = array_values(array_filter(
                 $this->users->findAll(),
-                fn($u) => in_array((int) $u['id'], $memberIds, true) && (int) $u['id'] !== (int) $authUser['id']
+                fn($u) => empty($u['deleted_at']) && in_array((int) $u['id'], $memberIds, true) && (int) $u['id'] !== (int) $authUser['id']
             ));
         } else {
             $users = array_values(array_filter(
                 $this->users->findAll(),
-                fn($u) => (int) $u['id'] !== (int) $authUser['id']
+                fn($u) => empty($u['deleted_at']) && (int) $u['id'] !== (int) $authUser['id']
             ));
         }
 
